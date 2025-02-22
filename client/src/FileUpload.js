@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:5000";
+
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+});
+
 const FileUpload = () => {
   const [file, setFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(null);
@@ -10,7 +16,7 @@ const FileUpload = () => {
   // Fetch files from backend
   const fetchFiles = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/files");
+      const response = await axiosInstance.get(`${BASE_URL}/files`);
       setFiles(response.data.files);
     } catch (error) {
       console.error("Error fetching files:", error);
@@ -36,25 +42,41 @@ const FileUpload = () => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axiosInstance.post(
+        `${BASE_URL}/upload`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       setUploadStatus({ success: true, url: response.data.file_url });
       fetchFiles(); // Refresh file list after upload
     } catch (error) {
-      setUploadStatus({ success: false, message: error.response?.data?.error || "Upload failed" });
+      setUploadStatus({
+        success: false,
+        message: error.response?.data?.error || "Upload failed",
+      });
     }
     setLoading(false);
   };
 
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
-      <h1 className="text-center mb-4 fw-bold">Google Drive Clone - File Upload</h1>
-      
+      <h1 className="text-center mb-4 fw-bold">
+        Google Drive Clone - File Upload
+      </h1>
+
       {/* Upload Box */}
-      <div className="card shadow-sm p-4 text-center" style={{ maxWidth: "500px", width: "100%" }}>
+      <div
+        className="card shadow-sm p-4 text-center"
+        style={{ maxWidth: "500px", width: "100%" }}
+      >
         <h4 className="fw-bold mb-3">Upload a File</h4>
-        <input type="file" className="form-control mb-3" onChange={handleFileChange} />
+        <input
+          type="file"
+          className="form-control mb-3"
+          onChange={handleFileChange}
+        />
         <button
           onClick={handleUpload}
           disabled={loading}
@@ -66,11 +88,20 @@ const FileUpload = () => {
 
       {/* Upload Status */}
       {uploadStatus && (
-        <div className={`alert mt-3 ${uploadStatus.success ? "alert-success" : "alert-danger"} text-center`} style={{ maxWidth: "500px", width: "100%" }}>
+        <div
+          className={`alert mt-3 ${
+            uploadStatus.success ? "alert-success" : "alert-danger"
+          } text-center`}
+          style={{ maxWidth: "500px", width: "100%" }}
+        >
           {uploadStatus.success ? (
             <p>
               File uploaded!{" "}
-              <a href={uploadStatus.url} target="_blank" rel="noopener noreferrer">
+              <a
+                href={uploadStatus.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 View file
               </a>
             </p>
@@ -81,7 +112,10 @@ const FileUpload = () => {
       )}
 
       {/* File List */}
-      <div className="mt-5 text-center" style={{ maxWidth: "600px", width: "100%" }}>
+      <div
+        className="mt-5 text-center"
+        style={{ maxWidth: "600px", width: "100%" }}
+      >
         <h3 className="fw-semibold mb-3">Uploaded Files</h3>
         <div className="list-group shadow-sm">
           {files.length > 0 ? (
