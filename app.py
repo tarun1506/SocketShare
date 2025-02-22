@@ -1,6 +1,7 @@
 import os
 import boto3
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
 # AWS S3 Configuration
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
@@ -40,6 +42,19 @@ def upload_file():
         return jsonify({"message": "File uploaded successfully", "file_url": file_url}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/files", methods=["GET"])
+def list_files():
+    try:
+        files = s3_client.list_objects_v2(Bucket=S3_BUCKET)
+        file_urls = [
+            f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{file['Key']}"
+            for file in files.get("Contents", [])
+        ]
+        return jsonify({"files": file_urls}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
