@@ -42,8 +42,7 @@ def upload_file():
     filename = secure_filename(file.filename)
 
     try:
-        # Set ACL to public-read so that the file is accessible via its URL
-        s3_client.upload_fileobj(file, S3_BUCKET, filename, ExtraArgs={"ACL": "public-read"})
+        s3_client.upload_fileobj(file, S3_BUCKET, filename)
         file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
         return jsonify({"message": "File uploaded successfully", "file_url": file_url}), 200
     except Exception as e:
