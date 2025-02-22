@@ -62,7 +62,7 @@ def list_files():
 
 if __name__ == "__main__":
     app_env = os.getenv("APP_ENV")
-    port = os.getenv("PORT") if os.getenv("PORT") else 3000
+    port = int(os.getenv("PORT", 3000))
     if app_env == "development":
         app.run(debug=True, port=port)
     else:
