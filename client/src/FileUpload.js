@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:5000";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
