@@ -25,6 +25,10 @@ s3_client = boto3.client(
     region_name=S3_REGION
 )
 
+@app.route("/_health")
+def health():
+    return jsonify({"message": "OK"}), 200
+
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "file" not in request.files:
