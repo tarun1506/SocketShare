@@ -3,6 +3,7 @@ boto3==1.36.25
 botocore==1.36.25
 click==8.1.8
 Flask==3.1.0
+Flask-Cors==5.0.0
 importlib_metadata==8.6.1
 itsdangerous==2.2.0
 Jinja2==3.1.5
