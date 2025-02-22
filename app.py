@@ -66,4 +66,4 @@ if __name__ == "__main__":
     if app_env == "development":
         app.run(debug=True, port=port)
     else:
-        app.run(debug=False, port=port)
+        app.run(host="0.0.0.0", debug=False, port=port)
