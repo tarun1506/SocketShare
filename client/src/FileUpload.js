@@ -138,14 +138,14 @@ const FileUpload = () => {
               >
                 <span>{fileUrl.split("/").pop()}</span>
                 <div>
-                  <a
+                  {/* <a
                     href={fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-sm btn-primary me-2"
                   >
                     View
-                  </a>
+                  </a> */}
                   <button
                     onClick={() => handleDelete(fileUrl)}
                     className="btn btn-sm btn-danger"
