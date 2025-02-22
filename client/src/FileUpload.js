@@ -74,10 +74,6 @@ const FileUpload = () => {
 
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
-      <h1 className="text-center mb-4 fw-bold">
-        Google Drive Clone - File Upload
-      </h1>
-
       {/* Upload Box */}
       <div
         className="card shadow-sm p-4 text-center"
