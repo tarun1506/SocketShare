@@ -60,6 +60,18 @@ const FileUpload = () => {
     setLoading(false);
   };
 
+  // Deletion handler using a URL-safe file name
+  const handleDelete = async (fileUrl) => {
+    const rawFileName = fileUrl.split("/").pop();
+    const fileName = encodeURIComponent(rawFileName);
+    try {
+      await axiosInstance.delete(`${BASE_URL}/delete/${fileName}`);
+      fetchFiles(); // Refresh file list after deletion
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
       <h1 className="text-center mb-4 fw-bold">
@@ -120,16 +132,28 @@ const FileUpload = () => {
         <div className="list-group shadow-sm">
           {files.length > 0 ? (
             files.map((fileUrl, index) => (
-              <a
+              <div
                 key={index}
-                href={fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                className="list-group-item d-flex justify-content-between align-items-center"
               >
-                {fileUrl.split("/").pop()}
-                <span className="badge bg-secondary">View</span>
-              </a>
+                <span>{fileUrl.split("/").pop()}</span>
+                <div>
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-primary me-2"
+                  >
+                    View
+                  </a>
+                  <button
+                    onClick={() => handleDelete(fileUrl)}
+                    className="btn btn-sm btn-danger"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             ))
           ) : (
             <p className="text-muted">No files uploaded yet.</p>

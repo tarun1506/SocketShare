@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from urllib.parse import unquote
 
 # Load environment variables
 load_dotenv()
@@ -59,6 +60,15 @@ def list_files():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/delete/<path:filename>", methods=["DELETE"])
+def delete_file(filename):
+    # Decode the percent-encoded filename and then sanitize it.
+    filename = secure_filename(unquote(filename))
+    try:
+        s3_client.delete_object(Bucket=S3_BUCKET, Key=filename)
+        return jsonify({"message": "File deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app_env = os.getenv("APP_ENV")
