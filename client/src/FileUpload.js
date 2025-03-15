@@ -69,11 +69,8 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append("file", file);
 
-    // Start simulated progress
     let simulatedProgress = 0;
     const progressInterval = setInterval(() => {
-      // Increment progress more slowly at the beginning, faster towards the end
-      // but never reach 100% until the actual upload is complete
       if (simulatedProgress < 90) {
         const increment = Math.max(
           1,
@@ -91,7 +88,6 @@ const FileUpload = () => {
         {
           headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (progressEvent) => {
-            // Only use the actual progress if it's higher than our simulation
             const actualProgress = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
             );
@@ -102,21 +98,18 @@ const FileUpload = () => {
         }
       );
 
-      // Clear the interval and set progress to 100% when upload is complete
       clearInterval(progressInterval);
       setUploadProgress(100);
 
       setUploadStatus({ success: true, url: response.data.file_url });
-      fetchFiles(); // Refresh file list after upload
-      setFile(null); // Clear the selected file
+      fetchFiles();
+      setFile(null);
 
-      // Set a timeout to clear the upload status after 3 seconds
       setTimeout(() => {
         setUploadStatus(null);
         setUploadProgress(0);
       }, TIMEOUT_DURATION);
     } catch (error) {
-      // Clear the interval on error
       clearInterval(progressInterval);
 
       setUploadStatus({
@@ -128,37 +121,31 @@ const FileUpload = () => {
     setLoading(false);
   };
 
-  // Deletion handler using a URL-safe file name
   const handleDelete = async (fileUrl) => {
     const rawFileName = fileUrl.split("/").pop();
     const fileName = encodeURIComponent(rawFileName);
     try {
       await axiosInstance.delete(`${BASE_URL}/delete/${fileName}`);
-      fetchFiles(); // Refresh file list after deletion
+      fetchFiles();
     } catch (error) {
       console.error("Error deleting file:", error);
     }
   };
 
-  // Download handler
   const handleDownload = async (fileUrl) => {
     const rawFileName = fileUrl.split("/").pop();
     const fileName = encodeURIComponent(rawFileName);
 
-    // Set loading state for this specific file
     setDownloadLoading((prev) => ({ ...prev, [rawFileName]: true }));
     setDownloadProgress((prev) => ({ ...prev, [rawFileName]: 0 }));
 
     try {
-      // First get the download URL
       const response = await axiosInstance.get(
         `${BASE_URL}/download/${fileName}`
       );
 
-      // Then download the file with progress tracking
       const downloadUrl = response.data.download_url;
 
-      // Use axios to download with progress
       const downloadResponse = await axiosInstance.get(downloadUrl, {
         responseType: "blob",
         onDownloadProgress: (progressEvent) => {
@@ -172,7 +159,6 @@ const FileUpload = () => {
         },
       });
 
-      // Create a download link
       const url = window.URL.createObjectURL(new Blob([downloadResponse.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -185,7 +171,6 @@ const FileUpload = () => {
       console.error("Error downloading file:", error);
       alert("Failed to download file. Please try again.");
     } finally {
-      // Clear loading state for this file after a short delay to show 100%
       setTimeout(() => {
         setDownloadLoading((prev) => ({ ...prev, [rawFileName]: false }));
         setDownloadProgress((prev) => ({ ...prev, [rawFileName]: 0 }));
