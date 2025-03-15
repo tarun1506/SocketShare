@@ -3,6 +3,8 @@ import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
 
+const TIMEOUT_DURATION = 3000;
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
@@ -52,6 +54,11 @@ const FileUpload = () => {
       );
       setUploadStatus({ success: true, url: response.data.file_url });
       fetchFiles(); // Refresh file list after upload
+
+      // Set a timeout to clear the upload status after 30 seconds
+      setTimeout(() => {
+        setUploadStatus(null);
+      }, TIMEOUT_DURATION);
     } catch (error) {
       setUploadStatus({
         success: false,
