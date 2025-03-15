@@ -69,6 +69,21 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append("file", file);
 
+    // Start simulated progress
+    let simulatedProgress = 0;
+    const progressInterval = setInterval(() => {
+      // Increment progress more slowly at the beginning, faster towards the end
+      // but never reach 100% until the actual upload is complete
+      if (simulatedProgress < 90) {
+        const increment = Math.max(
+          1,
+          Math.floor((90 - simulatedProgress) / 10)
+        );
+        simulatedProgress += increment;
+        setUploadProgress(simulatedProgress);
+      }
+    }, 200);
+
     try {
       const response = await axiosInstance.post(
         `${BASE_URL}/upload`,
@@ -76,13 +91,21 @@ const FileUpload = () => {
         {
           headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
+            // Only use the actual progress if it's higher than our simulation
+            const actualProgress = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
             );
-            setUploadProgress(percentCompleted);
+            if (actualProgress > simulatedProgress) {
+              setUploadProgress(actualProgress);
+            }
           },
         }
       );
+
+      // Clear the interval and set progress to 100% when upload is complete
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
       setUploadStatus({ success: true, url: response.data.file_url });
       fetchFiles(); // Refresh file list after upload
       setFile(null); // Clear the selected file
@@ -93,6 +116,9 @@ const FileUpload = () => {
         setUploadProgress(0);
       }, TIMEOUT_DURATION);
     } catch (error) {
+      // Clear the interval on error
+      clearInterval(progressInterval);
+
       setUploadStatus({
         success: false,
         message: error.response?.data?.error || "Upload failed",

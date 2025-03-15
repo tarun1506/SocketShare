@@ -269,6 +269,31 @@ body {
   padding: 2rem 0;
 }
 
+/* Progress bar styles */
+.progress-container {
+  width: 100%;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 24px;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-text {
+  z-index: 1;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .app-header h1 {
