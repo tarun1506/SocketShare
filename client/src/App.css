@@ -6,10 +6,11 @@
   --success-color: #06d6a0;
   --text-color: #2b2d42;
   --text-light: #8d99ae;
-  --bg-color: #f8f9fa;
+  --bg-color: #f0f4f8;
   --card-bg: #ffffff;
   --border-color: #edf2f7;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.06);
   --radius: 8px;
   --transition: all 0.2s ease;
 }
@@ -23,7 +24,12 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: var(--text-color);
-  background-color: var(--bg-color);
+  background-color: #e9eef5;
+  background-image: 
+    linear-gradient(135deg, #e9eef5 0%, #f0f4f8 100%),
+    radial-gradient(circle at 25px 25px, rgba(58, 134, 255, 0.015) 2%, transparent 0%),
+    radial-gradient(circle at 75px 75px, rgba(58, 134, 255, 0.01) 2%, transparent 0%);
+  background-size: 100%, 100px 100px, 100px 100px;
   line-height: 1.6;
 }
 
@@ -81,6 +87,11 @@ body {
   transition: var(--transition);
   margin-bottom: 2rem;
   cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.upload-area:hover {
+  box-shadow: var(--shadow-hover);
 }
 
 .upload-area.drag-active {
@@ -170,6 +181,7 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .files-section h3 {
@@ -192,11 +204,13 @@ body {
   border-radius: var(--radius);
   border: 1px solid var(--border-color);
   transition: var(--transition);
+  background-color: var(--card-bg);
 }
 
 .file-item:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }
 
 .file-name {
