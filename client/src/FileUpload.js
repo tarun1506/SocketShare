@@ -205,39 +205,43 @@ const FileUpload = () => {
       >
         <div className="upload-icon">
           <svg
+            xmlns="http://www.w3.org/2000/svg"
             width="48"
             height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
           >
             <path
-              d="M12 16L12 8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d="M320,367.79h76c55,0,100-29.21,100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8-69,0-113.44,45.79-128,91.2-60,5.7-112,43.88-112,106.4s54,106.4,120,106.4h56"
+              style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: "32px",
+              }}
             />
-            <path
-              d="M9 11L12 8L15 11"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <polyline
+              points="320 255.79 256 191.79 192 255.79"
+              style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: "32px",
+              }}
             />
-            <path
-              d="M20 16.7428C20 17.2635 19.7761 17.7631 19.3761 18.1184C18.9761 18.4737 18.4422 18.6363 17.9058 18.5637C17.4468 18.5026 17.0354 18.2499 16.7677 17.8683C16.5 17.4867 16.4 17.0181 16.4848 16.5547C16.5612 16.1385 16.7921 15.7559 17.1407 15.4772C17.4893 15.1984 17.9327 15.0414 18.3906 15.0361C18.8484 15.0309 19.2952 15.1776 19.6504 15.4487C20.0056 15.7198 20.2457 16.0973 20.332 16.5116C20.3644 16.6539 20.3812 16.7981 20.382 16.9428"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M16 20H8C6.89543 20 6 19.1046 6 18V6C6 4.89543 6.89543 4 8 4H16C17.1046 4 18 4.89543 18 6V12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <line
+              x1="256"
+              y1="448.21"
+              x2="256"
+              y2="207.79"
+              style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: "32px",
+              }}
             />
           </svg>
         </div>
