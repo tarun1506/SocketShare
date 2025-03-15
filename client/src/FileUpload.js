@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./styles.css";
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
@@ -18,6 +18,11 @@ const FileUpload = () => {
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [downloadProgress, setDownloadProgress] = useState({});
+  const [deleteModal, setDeleteModal] = useState({
+    show: false,
+    fileUrl: null,
+  });
+  const dialogRef = useRef(null);
 
   // Fetch files from backend
   const fetchFiles = async () => {
@@ -127,8 +132,26 @@ const FileUpload = () => {
     try {
       await axiosInstance.delete(`${BASE_URL}/delete/${fileName}`);
       fetchFiles();
+      setDeleteModal({ show: false, fileUrl: null });
+      if (dialogRef.current) {
+        dialogRef.current.close();
+      }
     } catch (error) {
       console.error("Error deleting file:", error);
+    }
+  };
+
+  const confirmDelete = (fileUrl) => {
+    setDeleteModal({ show: true, fileUrl });
+    if (dialogRef.current) {
+      dialogRef.current.showModal();
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModal({ show: false, fileUrl: null });
+    if (dialogRef.current) {
+      dialogRef.current.close();
     }
   };
 
@@ -348,7 +371,7 @@ const FileUpload = () => {
                       </div>
                     </button>
                     <button
-                      onClick={() => handleDelete(fileUrl)}
+                      onClick={() => confirmDelete(fileUrl)}
                       className="action-button delete"
                       title="Delete"
                     >
@@ -405,6 +428,26 @@ const FileUpload = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <dialog ref={dialogRef} className="delete-dialog">
+        <div className="dialog-content">
+          <h3>Confirm Delete</h3>
+          <p>Are you sure you want to delete this file?</p>
+          <p className="filename">{deleteModal.fileUrl?.split("/").pop()}</p>
+          <div className="dialog-buttons">
+            <button className="dialog-button cancel" onClick={cancelDelete}>
+              Cancel
+            </button>
+            <button
+              className="dialog-button delete"
+              onClick={() => handleDelete(deleteModal.fileUrl)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 };
