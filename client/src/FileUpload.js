@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import "./styles.css";
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
 
 const TIMEOUT_DURATION = 3000;
@@ -280,42 +280,57 @@ const FileUpload = () => {
                     <button
                       onClick={() => handleDownload(fileUrl)}
                       disabled={isDownloading}
-                      className="action-button download"
+                      className={`action-button download ${
+                        isDownloading ? "downloading" : ""
+                      }`}
                       title="Download"
+                      style={
+                        isDownloading
+                          ? {
+                              background: `conic-gradient(#4caf50 ${downloadPercent}%, transparent ${downloadPercent}%)`,
+                            }
+                          : {}
+                      }
                     >
-                      {isDownloading ? (
-                        <span className="loading-spinner"></span>
-                      ) : (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12 16L12 8"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M15 13L12 16L9 13"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M20 16V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V16"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
+                      <div className="button-content">
+                        {isDownloading ? (
+                          <>
+                            <span className="download-percent">
+                              {downloadPercent}%
+                            </span>
+                          </>
+                        ) : (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12 16L12 8"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M15 13L12 16L9 13"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M20 16V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V16"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
                     </button>
                     <button
                       onClick={() => handleDelete(fileUrl)}
@@ -367,20 +382,6 @@ const FileUpload = () => {
                       </svg>
                     </button>
                   </div>
-
-                  {/* Download Progress Bar */}
-                  {isDownloading && (
-                    <div className="progress-container download-progress">
-                      <div
-                        className="progress-bar"
-                        style={{ width: `${downloadPercent}%` }}
-                      >
-                        <span className="progress-text">
-                          {downloadPercent}%
-                        </span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })
