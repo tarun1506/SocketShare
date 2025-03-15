@@ -16,6 +16,8 @@ const FileUpload = () => {
   const [files, setFiles] = useState([]);
   const [downloadLoading, setDownloadLoading] = useState({});
   const [dragActive, setDragActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState({});
 
   // Fetch files from backend
   const fetchFiles = async () => {
@@ -33,6 +35,7 @@ const FileUpload = () => {
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
+    setUploadProgress(0);
   };
 
   const handleDrag = (e) => {
@@ -51,6 +54,7 @@ const FileUpload = () => {
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setFile(e.dataTransfer.files[0]);
+      setUploadProgress(0);
     }
   };
 
@@ -61,6 +65,7 @@ const FileUpload = () => {
     }
 
     setLoading(true);
+    setUploadProgress(0);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -70,6 +75,12 @@ const FileUpload = () => {
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          },
         }
       );
       setUploadStatus({ success: true, url: response.data.file_url });
@@ -79,12 +90,14 @@ const FileUpload = () => {
       // Set a timeout to clear the upload status after 3 seconds
       setTimeout(() => {
         setUploadStatus(null);
+        setUploadProgress(0);
       }, TIMEOUT_DURATION);
     } catch (error) {
       setUploadStatus({
         success: false,
         message: error.response?.data?.error || "Upload failed",
       });
+      setUploadProgress(0);
     }
     setLoading(false);
   };
@@ -108,26 +121,49 @@ const FileUpload = () => {
 
     // Set loading state for this specific file
     setDownloadLoading((prev) => ({ ...prev, [rawFileName]: true }));
+    setDownloadProgress((prev) => ({ ...prev, [rawFileName]: 0 }));
 
     try {
+      // First get the download URL
       const response = await axiosInstance.get(
         `${BASE_URL}/download/${fileName}`
       );
 
-      // Create a temporary link element to trigger the download
+      // Then download the file with progress tracking
       const downloadUrl = response.data.download_url;
+
+      // Use axios to download with progress
+      const downloadResponse = await axiosInstance.get(downloadUrl, {
+        responseType: "blob",
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setDownloadProgress((prev) => ({
+            ...prev,
+            [rawFileName]: percentCompleted,
+          }));
+        },
+      });
+
+      // Create a download link
+      const url = window.URL.createObjectURL(new Blob([downloadResponse.data]));
       const link = document.createElement("a");
-      link.href = downloadUrl;
+      link.href = url;
       link.setAttribute("download", rawFileName);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading file:", error);
       alert("Failed to download file. Please try again.");
     } finally {
-      // Clear loading state for this file
-      setDownloadLoading((prev) => ({ ...prev, [rawFileName]: false }));
+      // Clear loading state for this file after a short delay to show 100%
+      setTimeout(() => {
+        setDownloadLoading((prev) => ({ ...prev, [rawFileName]: false }));
+        setDownloadProgress((prev) => ({ ...prev, [rawFileName]: 0 }));
+      }, 500);
     }
   };
 
@@ -198,6 +234,18 @@ const FileUpload = () => {
         >
           {loading ? "Uploading..." : "Upload"}
         </button>
+
+        {/* Upload Progress Bar */}
+        {loading && (
+          <div className="progress-container">
+            <div
+              className="progress-bar"
+              style={{ width: `${uploadProgress}%` }}
+            >
+              <span className="progress-text">{uploadProgress}%</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upload Status */}
@@ -222,17 +270,20 @@ const FileUpload = () => {
           {files.length > 0 ? (
             files.map((fileUrl, index) => {
               const fileName = fileUrl.split("/").pop();
+              const isDownloading = downloadLoading[fileName];
+              const downloadPercent = downloadProgress[fileName] || 0;
+
               return (
                 <div key={index} className="file-item">
                   <div className="file-name">{fileName}</div>
                   <div className="file-actions">
                     <button
                       onClick={() => handleDownload(fileUrl)}
-                      disabled={downloadLoading[fileName]}
+                      disabled={isDownloading}
                       className="action-button download"
                       title="Download"
                     >
-                      {downloadLoading[fileName] ? (
+                      {isDownloading ? (
                         <span className="loading-spinner"></span>
                       ) : (
                         <svg
@@ -316,6 +367,20 @@ const FileUpload = () => {
                       </svg>
                     </button>
                   </div>
+
+                  {/* Download Progress Bar */}
+                  {isDownloading && (
+                    <div className="progress-container download-progress">
+                      <div
+                        className="progress-bar"
+                        style={{ width: `${downloadPercent}%` }}
+                      >
+                        <span className="progress-text">
+                          {downloadPercent}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })
