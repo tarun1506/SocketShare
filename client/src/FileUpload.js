@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -12,6 +12,7 @@ const FileUpload = () => {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
+  const [downloadLoading, setDownloadLoading] = useState({});
 
   // Fetch files from backend
   const fetchFiles = async () => {
@@ -69,6 +70,36 @@ const FileUpload = () => {
       fetchFiles(); // Refresh file list after deletion
     } catch (error) {
       console.error("Error deleting file:", error);
+    }
+  };
+
+  // Download handler
+  const handleDownload = async (fileUrl) => {
+    const rawFileName = fileUrl.split("/").pop();
+    const fileName = encodeURIComponent(rawFileName);
+
+    // Set loading state for this specific file
+    setDownloadLoading((prev) => ({ ...prev, [rawFileName]: true }));
+
+    try {
+      const response = await axiosInstance.get(
+        `${BASE_URL}/download/${fileName}`
+      );
+
+      // Create a temporary link element to trigger the download
+      const downloadUrl = response.data.download_url;
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", rawFileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      alert("Failed to download file. Please try again.");
+    } finally {
+      // Clear loading state for this file
+      setDownloadLoading((prev) => ({ ...prev, [rawFileName]: false }));
     }
   };
 
@@ -134,14 +165,15 @@ const FileUpload = () => {
               >
                 <span>{fileUrl.split("/").pop()}</span>
                 <div>
-                  {/* <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => handleDownload(fileUrl)}
+                    disabled={downloadLoading[fileUrl.split("/").pop()]}
                     className="btn btn-sm btn-primary me-2"
                   >
-                    View
-                  </a> */}
+                    {downloadLoading[fileUrl.split("/").pop()]
+                      ? "Downloading..."
+                      : "Download"}
+                  </button>
                   <button
                     onClick={() => handleDelete(fileUrl)}
                     className="btn btn-sm btn-danger"
