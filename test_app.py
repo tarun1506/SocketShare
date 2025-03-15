@@ -133,4 +133,42 @@ def test_delete_file_error(mock_s3_client, client):
     assert response.status_code == 500
     data = json.loads(response.data)
     assert 'error' in data
+    assert data['error'] == 'S3 error'
+
+@patch('app.s3_client')
+def test_download_file_success(mock_s3_client, client):
+    """Test successful file download."""
+    # Mock the presigned URL
+    presigned_url = "https://test-bucket.s3.amazonaws.com/test_file.txt?signature=abc123"
+    mock_s3_client.generate_presigned_url.return_value = presigned_url
+    
+    # Make request
+    response = client.get('/download/test_file.txt')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'download_url' in data
+    assert data['download_url'] == presigned_url
+    
+    # Verify S3 client was called correctly
+    mock_s3_client.generate_presigned_url.assert_called_once_with(
+        'get_object',
+        Params={'Bucket': os.getenv("S3_BUCKET_NAME"), 'Key': 'test_file.txt'},
+        ExpiresIn=3600
+    )
+
+@patch('app.s3_client')
+def test_download_file_error(mock_s3_client, client):
+    """Test file download with S3 error."""
+    # Mock S3 generate_presigned_url to raise exception
+    mock_s3_client.generate_presigned_url.side_effect = Exception("S3 error")
+    
+    # Make request
+    response = client.get('/download/test_file.txt')
+    
+    # Assertions
+    assert response.status_code == 500
+    data = json.loads(response.data)
+    assert 'error' in data
     assert data['error'] == 'S3 error' 

@@ -70,6 +70,21 @@ def delete_file(filename):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/download/<path:filename>", methods=["GET"])
+def download_file(filename):
+    # Decode the percent-encoded filename and then sanitize it.
+    filename = secure_filename(unquote(filename))
+    try:
+        # Generate a presigned URL for the S3 object
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': S3_BUCKET, 'Key': filename},
+            ExpiresIn=3600  # URL expires in 1 hour
+        )
+        return jsonify({"download_url": presigned_url}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     app_env = os.getenv("APP_ENV")
     port = int(os.getenv("PORT", 3000))
