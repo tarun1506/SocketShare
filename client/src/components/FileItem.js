@@ -8,6 +8,7 @@ const FileItem = ({
   onDelete,
   onPreview,
   onTextPreview,
+  onPdfPreview,
 }) => {
   const fileName = fileUrl.split("/").pop();
   const isDownloading = downloadLoading[fileName];
@@ -20,11 +21,16 @@ const FileItem = ({
   const isTextFile =
     /\.(txt|md|json|csv|xml|log|html|css|js|jsx|ts|tsx|yaml)$/i.test(fileName);
 
+  // Check if the file is a PDF
+  const isPdf = /\.pdf$/i.test(fileName);
+
   const handleFileNameClick = () => {
     if (isImage) {
       onPreview(fileUrl);
     } else if (isTextFile) {
       onTextPreview(fileUrl);
+    } else if (isPdf) {
+      onPdfPreview(fileUrl);
     }
   };
 
@@ -33,9 +39,9 @@ const FileItem = ({
       <div
         className={`file-name ${isImage ? "image-file" : ""} ${
           isTextFile ? "text-file" : ""
-        }`}
+        } ${isPdf ? "pdf-file" : ""}`}
         onClick={handleFileNameClick}
-        title={isImage || isTextFile ? "Click to preview" : ""}
+        title={isImage || isTextFile || isPdf ? "Click to preview" : ""}
       >
         {fileName}
       </div>

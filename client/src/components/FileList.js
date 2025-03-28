@@ -10,6 +10,7 @@ const FileList = ({
   onDelete,
   onPreview,
   onTextPreview,
+  onPdfPreview,
 }) => {
   return (
     <div className="file-list">
@@ -24,6 +25,7 @@ const FileList = ({
             onDelete={onDelete}
             onPreview={onPreview}
             onTextPreview={onTextPreview}
+            onPdfPreview={onPdfPreview}
           />
         ))
       ) : (

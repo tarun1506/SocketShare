@@ -10,6 +10,7 @@ import FileList from "./components/FileList";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 import ImagePreview from "./components/ImagePreview";
 import TextPreview from "./components/TextPreview";
+import PdfPreview from "./components/PdfPreview";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
 const TIMEOUT_DURATION = 3000;
@@ -38,6 +39,7 @@ const FileUpload = () => {
   const dialogRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [previewText, setPreviewText] = useState(null);
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   // Fetch files from backend
   const fetchFiles = async () => {
@@ -251,6 +253,15 @@ const FileUpload = () => {
     setPreviewText(null);
   };
 
+  const handlePdfPreview = (fileUrl) => {
+    console.log("Previewing PDF:", fileUrl);
+    setPreviewPdf(fileUrl);
+  };
+
+  const closePdfPreview = () => {
+    setPreviewPdf(null);
+  };
+
   return (
     <div className="file-upload-container">
       {/* Upload Box */}
@@ -286,6 +297,7 @@ const FileUpload = () => {
           onDelete={confirmDelete}
           onPreview={handlePreview}
           onTextPreview={handleTextPreview}
+          onPdfPreview={handlePdfPreview}
         />
       </div>
 
@@ -305,6 +317,11 @@ const FileUpload = () => {
       {/* Text Preview */}
       {previewText && (
         <TextPreview fileUrl={previewText} onClose={closeTextPreview} />
+      )}
+
+      {/* PDF Preview */}
+      {previewPdf && (
+        <PdfPreview fileUrl={previewPdf} onClose={closePdfPreview} />
       )}
     </div>
   );
