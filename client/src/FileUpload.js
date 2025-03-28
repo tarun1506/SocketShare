@@ -3,7 +3,6 @@ import axios from "axios";
 import "./styles.css";
 
 // Import Components
-import ProgressBar from "./components/ProgressBar";
 import StatusMessage from "./components/StatusMessage";
 import UploadArea from "./components/UploadArea";
 import SearchBar from "./components/SearchBar";
