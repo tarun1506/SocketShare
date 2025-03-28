@@ -8,6 +8,7 @@ const FileList = ({
   downloadProgress,
   onDownload,
   onDelete,
+  onPreview,
 }) => {
   return (
     <div className="file-list">
@@ -20,6 +21,7 @@ const FileList = ({
             downloadProgress={downloadProgress}
             onDownload={onDownload}
             onDelete={onDelete}
+            onPreview={onPreview}
           />
         ))
       ) : (

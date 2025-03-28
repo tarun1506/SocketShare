@@ -6,14 +6,24 @@ const FileItem = ({
   downloadProgress,
   onDownload,
   onDelete,
+  onPreview,
 }) => {
   const fileName = fileUrl.split("/").pop();
   const isDownloading = downloadLoading[fileName];
   const downloadPercent = downloadProgress[fileName] || 0;
 
+  // Check if the file is an image
+  const isImage = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(fileName);
+
   return (
     <div className="file-item">
-      <div className="file-name">{fileName}</div>
+      <div
+        className={`file-name ${isImage ? "image-file" : ""}`}
+        onClick={() => isImage && onPreview(fileUrl)}
+        title={isImage ? "Click to preview" : ""}
+      >
+        {fileName}
+      </div>
       <div className="file-actions">
         <button
           onClick={() => onDownload(fileUrl)}
