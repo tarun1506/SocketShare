@@ -85,6 +85,23 @@ def download_file(filename):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/search", methods=["GET"])
+def search_files():
+    try:
+        query = request.args.get("query", "").lower()
+        if not query:
+            return jsonify({"files": []}), 200
+            
+        files = s3_client.list_objects_v2(Bucket=S3_BUCKET)
+        matching_files = [
+            f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{file['Key']}"
+            for file in files.get("Contents", [])
+            if query in file['Key'].lower()
+        ]
+        return jsonify({"files": matching_files}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     app_env = os.getenv("APP_ENV")
     port = int(os.getenv("PORT", 3000))

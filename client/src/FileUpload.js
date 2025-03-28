@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import "./styles.css";
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
@@ -22,6 +22,9 @@ const FileUpload = () => {
     show: false,
     fileUrl: null,
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimeoutRef = useRef(null);
   const dialogRef = useRef(null);
 
   // Fetch files from backend
@@ -34,8 +37,51 @@ const FileUpload = () => {
     }
   };
 
+  // Debounced search function
+  const searchFiles = useCallback(async (query) => {
+    if (query.trim() === "") {
+      fetchFiles();
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await axiosInstance.get(`${BASE_URL}/search`, {
+        params: { query },
+      });
+      setFiles(response.data.files);
+    } catch (error) {
+      console.error("Error searching files:", error);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  // Handle search input with debounce
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set a new timeout for the search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchFiles(query);
+    }, 500); // 500ms debounce time
+  };
+
   useEffect(() => {
     fetchFiles();
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, []);
 
   const handleFileChange = (event) => {
@@ -301,9 +347,25 @@ const FileUpload = () => {
         </div>
       )}
 
-      {/* File List */}
+      {/* File List with Search */}
       <div className="files-section">
-        <h3>Your Files</h3>
+        <div className="files-header">
+          <h3>Files</h3>
+          <div className="search-container">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search files..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            {searchLoading && (
+              <div className="search-loading">
+                <div className="spinner"></div>
+              </div>
+            )}
+          </div>
+        </div>
         <div className="file-list">
           {files.length > 0 ? (
             files.map((fileUrl, index) => {
@@ -424,7 +486,11 @@ const FileUpload = () => {
               );
             })
           ) : (
-            <p className="no-files">No files uploaded yet.</p>
+            <p className="no-files">
+              {searchQuery
+                ? "No matching files found."
+                : "No files uploaded yet."}
+            </p>
           )}
         </div>
       </div>
