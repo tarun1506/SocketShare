@@ -12,6 +12,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
+    "react-pdf": "^9.2.1",
     "react-scripts": "5.0.1",
     "serve": "^14.2.4",
     "web-vitals": "^2.1.4"
