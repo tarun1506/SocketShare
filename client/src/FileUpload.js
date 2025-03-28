@@ -9,6 +9,7 @@ import SearchBar from "./components/SearchBar";
 import FileList from "./components/FileList";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 import ImagePreview from "./components/ImagePreview";
+import TextPreview from "./components/TextPreview";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL ?? "http://127.0.0.1:3000";
 const TIMEOUT_DURATION = 3000;
@@ -36,6 +37,7 @@ const FileUpload = () => {
   const searchTimeoutRef = useRef(null);
   const dialogRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [previewText, setPreviewText] = useState(null);
 
   // Fetch files from backend
   const fetchFiles = async () => {
@@ -240,6 +242,15 @@ const FileUpload = () => {
     setPreviewImage(null);
   };
 
+  const handleTextPreview = (fileUrl) => {
+    console.log("Previewing text:", fileUrl);
+    setPreviewText(fileUrl);
+  };
+
+  const closeTextPreview = () => {
+    setPreviewText(null);
+  };
+
   return (
     <div className="file-upload-container">
       {/* Upload Box */}
@@ -274,6 +285,7 @@ const FileUpload = () => {
           onDownload={handleDownload}
           onDelete={confirmDelete}
           onPreview={handlePreview}
+          onTextPreview={handleTextPreview}
         />
       </div>
 
@@ -288,6 +300,11 @@ const FileUpload = () => {
       {/* Image Preview */}
       {previewImage && (
         <ImagePreview imageUrl={previewImage} onClose={closePreview} />
+      )}
+
+      {/* Text Preview */}
+      {previewText && (
+        <TextPreview fileUrl={previewText} onClose={closeTextPreview} />
       )}
     </div>
   );

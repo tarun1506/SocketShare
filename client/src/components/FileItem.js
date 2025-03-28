@@ -7,6 +7,7 @@ const FileItem = ({
   onDownload,
   onDelete,
   onPreview,
+  onTextPreview,
 }) => {
   const fileName = fileUrl.split("/").pop();
   const isDownloading = downloadLoading[fileName];
@@ -15,12 +16,26 @@ const FileItem = ({
   // Check if the file is an image
   const isImage = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(fileName);
 
+  // Check if the file is a text file
+  const isTextFile =
+    /\.(txt|md|json|csv|xml|log|html|css|js|jsx|ts|tsx|yaml)$/i.test(fileName);
+
+  const handleFileNameClick = () => {
+    if (isImage) {
+      onPreview(fileUrl);
+    } else if (isTextFile) {
+      onTextPreview(fileUrl);
+    }
+  };
+
   return (
     <div className="file-item">
       <div
-        className={`file-name ${isImage ? "image-file" : ""}`}
-        onClick={() => isImage && onPreview(fileUrl)}
-        title={isImage ? "Click to preview" : ""}
+        className={`file-name ${isImage ? "image-file" : ""} ${
+          isTextFile ? "text-file" : ""
+        }`}
+        onClick={handleFileNameClick}
+        title={isImage || isTextFile ? "Click to preview" : ""}
       >
         {fileName}
       </div>
