@@ -171,4 +171,131 @@ def test_download_file_error(mock_s3_client, client):
     assert response.status_code == 500
     data = json.loads(response.data)
     assert 'error' in data
-    assert data['error'] == 'S3 error' 
+    assert data['error'] == 'S3 error'
+
+@patch('app.s3_client')
+def test_search_files_success(mock_s3_client, client):
+    """Test successful file search with results."""
+    # Mock S3 response
+    mock_response = {
+        'Contents': [
+            {'Key': 'document1.pdf'},
+            {'Key': 'document2.pdf'},
+            {'Key': 'image1.jpg'}
+        ]
+    }
+    mock_s3_client.list_objects_v2.return_value = mock_response
+    
+    # Make request for "document" query
+    response = client.get('/search?query=document')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'files' in data
+    assert len(data['files']) == 2  # Only document1.pdf and document2.pdf should match
+    
+    # Check that returned URLs contain the matching files
+    for file_url in data['files']:
+        assert 'document' in file_url
+    
+    # Verify S3 client was called correctly
+    mock_s3_client.list_objects_v2.assert_called_once()
+
+@patch('app.s3_client')
+def test_search_files_no_results(mock_s3_client, client):
+    """Test file search with no matching results."""
+    # Mock S3 response
+    mock_response = {
+        'Contents': [
+            {'Key': 'document1.pdf'},
+            {'Key': 'document2.pdf'},
+            {'Key': 'image1.jpg'}
+        ]
+    }
+    mock_s3_client.list_objects_v2.return_value = mock_response
+    
+    # Make request with query that doesn't match any files
+    response = client.get('/search?query=video')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'files' in data
+    assert len(data['files']) == 0  # No files should match
+    
+    # Verify S3 client was called correctly
+    mock_s3_client.list_objects_v2.assert_called_once()
+
+@patch('app.s3_client')
+def test_search_files_empty_query(mock_s3_client, client):
+    """Test file search with empty query."""
+    # Make request with empty query
+    response = client.get('/search?query=')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'files' in data
+    assert len(data['files']) == 0  # Should return empty array for empty query
+    
+    # Verify S3 client was NOT called (early return from function)
+    mock_s3_client.list_objects_v2.assert_not_called()
+
+@patch('app.s3_client')
+def test_search_files_no_query_param(mock_s3_client, client):
+    """Test file search with no query parameter."""
+    # Make request with no query parameter
+    response = client.get('/search')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'files' in data
+    assert len(data['files']) == 0  # Should return empty array
+    
+    # Verify S3 client was NOT called (early return from function)
+    mock_s3_client.list_objects_v2.assert_not_called()
+
+@patch('app.s3_client')
+def test_search_files_case_insensitive(mock_s3_client, client):
+    """Test that file search is case insensitive."""
+    # Mock S3 response
+    mock_response = {
+        'Contents': [
+            {'Key': 'Document1.pdf'},
+            {'Key': 'DOCUMENT2.PDF'},
+            {'Key': 'image1.jpg'}
+        ]
+    }
+    mock_s3_client.list_objects_v2.return_value = mock_response
+    
+    # Make request with lowercase query
+    response = client.get('/search?query=document')
+    
+    # Assertions
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'files' in data
+    assert len(data['files']) == 2  # Both document files should match despite case differences
+    
+    # Verify S3 client was called correctly
+    mock_s3_client.list_objects_v2.assert_called_once()
+
+@patch('app.s3_client')
+def test_search_files_error(mock_s3_client, client):
+    """Test file search with S3 error."""
+    # Mock S3 list_objects_v2 to raise exception
+    mock_s3_client.list_objects_v2.side_effect = Exception("S3 error")
+    
+    # Make request
+    response = client.get('/search?query=document')
+    
+    # Assertions
+    assert response.status_code == 500
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error'] == 'S3 error'
+    
+    # Verify S3 client was called
+    mock_s3_client.list_objects_v2.assert_called_once() 
